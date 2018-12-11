@@ -108,9 +108,14 @@ public class Main extends Application {
 
 
                 //launch(args);
-                Platform.runLater(() -> {
-                    launch(args);
-                });
+                
+                
+                Runnable r = new Runnable() {
+                    @Override
+                    public void run() {
+                        launch(args);
+                    }
+                }; 
 
                 System.out.println("\nWaiting for clients to find a result...");
 
