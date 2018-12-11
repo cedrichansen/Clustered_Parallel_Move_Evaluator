@@ -38,6 +38,8 @@ import java.util.concurrent.ForkJoinPool;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.io.ObjectOutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Main extends Application {
 
@@ -80,13 +82,11 @@ public class Main extends Application {
 
                 while (true) {
                     Socket socket = ss.accept();
-                    ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-                    ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-                    
-               
-                    System.out.println("Here is the parent board we will tackle");
-                    oos.writeObject(b);
-                    oos.flush();
+                    ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+                    System.out.println("Object to be written = ");
+                    b.printBoard();
+
+                    outputStream.writeObject(b);
 
                     socket.close();
 
@@ -108,21 +108,21 @@ public class Main extends Application {
             try {
                 while (true) {
                     Socket socket = new Socket(hostName, portNumber);
+
                     
-                    ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-                    Board theBoard = (Board)in.readObject();
-                    theBoard.printBoard();
+                    ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
+                    
+                    Board theBoard = (Board)inStream.readObject();
                     
                     
-                    in.close();
                     socket.close();
-                    
+
                 }
             } catch (IOException ioe) {
                 ioe.printStackTrace();
-            } catch (ClassNotFoundException ee) {
-                ee.printStackTrace();
-            }
+            } catch (ClassNotFoundException ex) {
+                ex.printStackTrace();
+            } 
 
         } else {
             System.out.println("Typed in invalid command.... Please relaunch");
