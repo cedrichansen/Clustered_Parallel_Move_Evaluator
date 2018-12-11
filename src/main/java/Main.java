@@ -43,7 +43,8 @@ import java.util.logging.Logger;
 
 public class Main extends Application {
 
-    private static Board b;
+    private static Board displayBoard;
+    private static Board boardToSolve;
     private static int numMoves;
 
     private static Pane root;
@@ -57,14 +58,14 @@ public class Main extends Application {
     private static Button orangeButton;
     private static Label numMovesLabel;
     private static VBox vbox;
+    private ArrayList<Socket> clients = new ArrayList();
+    private ArrayList<Board> clientBoards = new ArrayList();
 
     private static final int portNumber = 2697;
     private static String hostName;
 
     public static void main(String[] args) {
-        b = Board.generateRandomBoard(10, 10, 6);
-        Board boardToSolve = new Board(b);
-
+       
         Scanner kb = new Scanner(System.in);
         int role;
         System.out.println("Hello. \nPlease type 1 to accept connections (server role)\nPress 2 to connect to another computer");
@@ -73,6 +74,10 @@ public class Main extends Application {
         int numConnections = 0;
 
         if (role == 1) {
+             displayBoard = Board.generateRandomBoard(10, 10, 6);
+             boardToSolve = new Board(displayBoard);
+            
+            
             //do the server stuff
             System.out.println("Please enter the number of computers you wish to connect");
             requiredComputers = Integer.parseInt(kb.nextLine());
@@ -80,17 +85,25 @@ public class Main extends Application {
             try {
                 ss = new ServerSocket(portNumber);
 
-                while (true) {
+                while (numConnections<requiredComputers) {
                     Socket socket = ss.accept();
+                    if (socket != null) {
+                        System.out.println("Found a client!");
+                        numConnections++;
+                    }
+                    
                     ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
                     System.out.println("Object to be written = ");
-                    b.printBoard();
+                    displayBoard.printBoard();
 
-                    outputStream.writeObject(b);
+                    outputStream.writeObject(displayBoard);
 
                     socket.close();
 
                 }
+                
+                launch(args);
+
 
             } catch (IOException io) {
                 System.out.println("Something went wrong in client");
@@ -115,6 +128,9 @@ public class Main extends Application {
                     Board theBoard = (Board)inStream.readObject();
                     theBoard.printBoard();
                     
+                    ForkJoinPool childBoardSolver = new ForkJoinPool();
+                    childBoardSolver.invoke(boardToSolve);
+                    
                     socket.close();
 
                 }
@@ -128,10 +144,8 @@ public class Main extends Application {
             System.out.println("Typed in invalid command.... Please relaunch");
         }
 
-        ForkJoinPool childBoardSolver = new ForkJoinPool();
-        childBoardSolver.invoke(boardToSolve);
+        
 
-        launch(args);
 
     }
 
@@ -142,9 +156,9 @@ public class Main extends Application {
         numMoves = 0;
 
         colours = FXCollections.observableArrayList();
-        for (int i = 0; i < b.getSpaces().length; i++) {
-            for (int j = 0; j < b.getSpaces()[0].length; j++) {
-                colours.add(Board.getColour(b.getSpaces()[i][j].getColour()));
+        for (int i = 0; i < displayBoard.getSpaces().length; i++) {
+            for (int j = 0; j < displayBoard.getSpaces()[0].length; j++) {
+                colours.add(Board.getColour(displayBoard.getSpaces()[i][j].getColour()));
             }
         }
 
@@ -173,12 +187,12 @@ public class Main extends Application {
         redButton.setLayoutX(100);
         redButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
-                if ((b.getSpaces()[0][0].getColour() != 0 || numMoves == 0) && !b.isDoneFlooding()) {
+                if ((displayBoard.getSpaces()[0][0].getColour() != 0 || numMoves == 0) && !displayBoard.isDoneFlooding()) {
                     numMoves++;
-                    b.changeColour(0);
+                    displayBoard.changeColour(0);
                     changeGrid();
                     System.out.println();
-                    b.printBoard();
+                    displayBoard.printBoard();
                 }
             }
         });
@@ -189,12 +203,12 @@ public class Main extends Application {
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         blueButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
-                if ((b.getSpaces()[0][0].getColour() != 1 || numMoves == 0) && !b.isDoneFlooding()) {
+                if ((displayBoard.getSpaces()[0][0].getColour() != 1 || numMoves == 0) && !displayBoard.isDoneFlooding()) {
                     numMoves++;
-                    b.changeColour(1);
+                    displayBoard.changeColour(1);
                     changeGrid();
                     System.out.println();
-                    b.printBoard();
+                    displayBoard.printBoard();
                 }
             }
         });
@@ -204,12 +218,12 @@ public class Main extends Application {
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         yellowButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
-                if ((b.getSpaces()[0][0].getColour() != 2 || numMoves == 0) && !b.isDoneFlooding()) {
+                if ((displayBoard.getSpaces()[0][0].getColour() != 2 || numMoves == 0) && !displayBoard.isDoneFlooding()) {
                     numMoves++;
-                    b.changeColour(2);
+                    displayBoard.changeColour(2);
                     changeGrid();
                     System.out.println();
-                    b.printBoard();
+                    displayBoard.printBoard();
                 }
             }
         });
@@ -220,12 +234,12 @@ public class Main extends Application {
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         greenButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
-                if ((b.getSpaces()[0][0].getColour() != 3 || numMoves == 0) && !b.isDoneFlooding()) {
+                if ((displayBoard.getSpaces()[0][0].getColour() != 3 || numMoves == 0) && !displayBoard.isDoneFlooding()) {
                     numMoves++;
-                    b.changeColour(3);
+                    displayBoard.changeColour(3);
                     changeGrid();
                     System.out.println();
-                    b.printBoard();
+                    displayBoard.printBoard();
                 }
             }
         });
@@ -236,12 +250,12 @@ public class Main extends Application {
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         purpleButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
-                if ((b.getSpaces()[0][0].getColour() != 4 || numMoves == 0) && !b.isDoneFlooding()) {
+                if ((displayBoard.getSpaces()[0][0].getColour() != 4 || numMoves == 0) && !displayBoard.isDoneFlooding()) {
                     numMoves++;
-                    b.changeColour(4);
+                    displayBoard.changeColour(4);
                     changeGrid();
                     System.out.println();
-                    b.printBoard();
+                    displayBoard.printBoard();
 
                 }
             }
@@ -253,12 +267,12 @@ public class Main extends Application {
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         orangeButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
-                if ((b.getSpaces()[0][0].getColour() != 5 || numMoves == 0) && !b.isDoneFlooding()) {
+                if ((displayBoard.getSpaces()[0][0].getColour() != 5 || numMoves == 0) && !displayBoard.isDoneFlooding()) {
                     numMoves++;
-                    b.changeColour(5);
+                    displayBoard.changeColour(5);
                     changeGrid();
                     System.out.println();
-                    b.printBoard();
+                    displayBoard.printBoard();
 
                 }
             }
@@ -295,9 +309,9 @@ public class Main extends Application {
         vbox.getChildren().remove(numMovesLabel);
 
         ObservableList<Color> colours = FXCollections.observableArrayList();
-        for (int i = 0; i < b.getSpaces().length; i++) {
-            for (int j = 0; j < b.getSpaces()[0].length; j++) {
-                colours.add(Board.getColour(b.getSpaces()[i][j].getColour()));
+        for (int i = 0; i < displayBoard.getSpaces().length; i++) {
+            for (int j = 0; j < displayBoard.getSpaces()[0].length; j++) {
+                colours.add(Board.getColour(displayBoard.getSpaces()[i][j].getColour()));
             }
         }
 
@@ -332,7 +346,7 @@ public class Main extends Application {
         //root.setAlignment(Pos.BOTTOM_RIGHT);
         StackPane.setMargin(grid, new Insets(8, 8, 8, 8));
         vbox.getChildren().addAll(grid, numMovesLabel, yellowButton, blueButton, redButton, greenButton, purpleButton, orangeButton);
-        if (b.isDoneFlooding()) {
+        if (displayBoard.isDoneFlooding()) {
             vbox.getChildren().add(finishedLabel);
         }
 
