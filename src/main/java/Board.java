@@ -13,7 +13,7 @@ public class Board extends RecursiveAction implements Comparable, Serializable {
     private int numStepsTaken;
     private int numColours;
     private ArrayList<Space> encapsulatedSpaces;
-    private int numEncapsulatedSpaces;
+    private int numEncapsulatedSpaces = 1;
     private boolean doneFlooding = false;
 
     private Board parent;
@@ -142,13 +142,15 @@ public class Board extends RecursiveAction implements Comparable, Serializable {
         ArrayList<Board> goodChildBoards = new ArrayList<>();
 
         for (int i = 0; i < 6; i++) {
-            if (0 < copies[i].getNumEncapsulatedSpaces() - parentNumEncapsulated) {
+            int copyNumEncapsulatedSpaces = copies[i].numEncapsulatedSpaces;
+            if (0 < copyNumEncapsulatedSpaces- parentNumEncapsulated) {
 
                 goodChildBoards.add(copies[i]);
             }
         }
 
         Collections.sort(goodChildBoards);
+       
         return goodChildBoards;
     }
 
