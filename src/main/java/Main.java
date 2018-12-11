@@ -1,4 +1,11 @@
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -29,26 +36,99 @@ import java.util.concurrent.ForkJoinPool;
 
 public class Main extends Application {
 
+    private static Board b;
+    private static int numMoves;
 
+    private static Pane root;
+    private static GridView<Color> grid;
+    private static ObservableList<Color> colours;
+    private static Button redButton;
+    private static Button yellowButton;
+    private static Button blueButton;
+    private static Button greenButton;
+    private static Button purpleButton;
+    private static Button orangeButton;
+    private static Label numMovesLabel;
+    private static VBox vbox;
 
-    private static Board                    b;
-    private static int                      numMoves;
-
-    private static Pane                     root;
-    private static GridView<Color>          grid;
-    private static ObservableList<Color>    colours;
-    private static Button                   redButton;
-    private static Button                   yellowButton;
-    private static Button                   blueButton;
-    private static Button                   greenButton;
-    private static Button                   purpleButton;
-    private static Button                   orangeButton;
-    private static Label                    numMovesLabel;
-    private static VBox                     vbox;
-
-
+    private static final int portNumber = 2697;
+    private static final String hostName = "localhost";
 
     public static void main(String[] args) {
+        b = Board.generateRandomBoard(10, 10, 6);
+        Board boardToSolve = new Board(b);
+
+        Scanner kb = new Scanner(System.in);
+        int role;
+        System.out.println("Hello. \nPlease type 1 to accept connections (server role)\nPress 2 to connect to another computer");
+        role = Integer.parseInt(kb.nextLine());
+        int requiredComputers = 0;
+        int numConnections = 0;
+
+        if (role == 1) {
+            //do the server stuff
+            System.out.println("Please enter the number of computers you wish to connect");
+            requiredComputers = Integer.parseInt(kb.nextLine());
+            ServerSocket ss = null;
+            try {
+                ss = new ServerSocket(portNumber);
+
+                while (numConnections < requiredComputers) {
+                    Socket socket = ss.accept();
+                    OutputStream os = socket.getOutputStream();
+                    PrintWriter pw = new PrintWriter(os, true);
+                    pw.println("What's you name?");
+
+                    BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    String str = br.readLine();
+
+                    pw.println("Hello, " + str);
+                    pw.close();
+                    socket.close();
+
+                    System.out.println("Just said hello to:" + str);
+                }
+
+            } catch (IOException io) {
+                System.out.println("Something went wrong in client");
+                  
+            }
+            
+
+        } else if (role == 2) {
+            //do the "client" stuff
+
+            System.out.println("Creating socket to '" + hostName + "' on port " + portNumber);
+            try {
+                while (true) {
+                    Socket socket = new Socket(hostName, portNumber);
+                    BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+
+                    System.out.println("server says:" + br.readLine());
+
+                    BufferedReader userInputBR = new BufferedReader(new InputStreamReader(System.in));
+                    String userInput = userInputBR.readLine();
+
+                    out.println(userInput);
+
+                    System.out.println("server says:" + br.readLine());
+
+                    if ("exit".equalsIgnoreCase(userInput)) {
+                        socket.close();
+                        break;
+                    }
+                }
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+
+        } else {
+            System.out.println("Typed in invalid command.... Please relaunch");
+        }
+
+        ForkJoinPool childBoardSolver = new ForkJoinPool();
+        childBoardSolver.invoke(boardToSolve);
 
         launch(args);
 
@@ -56,25 +136,16 @@ public class Main extends Application {
 
     public void start(Stage primaryStage) throws Exception {
 
-        b = Board.generateRandomBoard(10, 10, 6);
-        b.printBoard();
-
-        Board boardToSolve = new Board(b);
-
-        ForkJoinPool childBoardSolver = new ForkJoinPool();
-        childBoardSolver.invoke(boardToSolve);
-
         vbox = new VBox(5);
 
         numMoves = 0;
 
         colours = FXCollections.observableArrayList();
-        for (int i = 0; i<b.getSpaces().length; i++) {
-            for (int j = 0; j<b.getSpaces()[0].length; j++) {
+        for (int i = 0; i < b.getSpaces().length; i++) {
+            for (int j = 0; j < b.getSpaces()[0].length; j++) {
                 colours.add(Board.getColour(b.getSpaces()[i][j].getColour()));
             }
         }
-
 
         grid = new GridView<Color>(colours);
 
@@ -89,12 +160,10 @@ public class Main extends Application {
             }
         });
 
-
         grid.setCellHeight(45);
         grid.setCellWidth(45);
         grid.setHorizontalCellSpacing(0);
         grid.setVerticalCellSpacing(0);
-
 
         redButton = new Button("   ");
         redButton.setBorder(new Border(new BorderStroke(Color.BLACK,
@@ -103,7 +172,7 @@ public class Main extends Application {
         redButton.setLayoutX(100);
         redButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
-                if ((b.getSpaces()[0][0].getColour() != 0  || numMoves == 0)&& !b.isDoneFlooding()) {
+                if ((b.getSpaces()[0][0].getColour() != 0 || numMoves == 0) && !b.isDoneFlooding()) {
                     numMoves++;
                     b.changeColour(0);
                     changeGrid();
@@ -113,14 +182,13 @@ public class Main extends Application {
             }
         });
 
-
         blueButton = new Button("   ");
         blueButton.setStyle("-fx-background-color: blue;");
         blueButton.setBorder(new Border(new BorderStroke(Color.BLACK,
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         blueButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
-                if ((b.getSpaces()[0][0].getColour() != 1  || numMoves == 0)&& !b.isDoneFlooding()) {
+                if ((b.getSpaces()[0][0].getColour() != 1 || numMoves == 0) && !b.isDoneFlooding()) {
                     numMoves++;
                     b.changeColour(1);
                     changeGrid();
@@ -135,7 +203,7 @@ public class Main extends Application {
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         yellowButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
-                if ((b.getSpaces()[0][0].getColour() != 2  || numMoves == 0)&& !b.isDoneFlooding()) {
+                if ((b.getSpaces()[0][0].getColour() != 2 || numMoves == 0) && !b.isDoneFlooding()) {
                     numMoves++;
                     b.changeColour(2);
                     changeGrid();
@@ -151,7 +219,7 @@ public class Main extends Application {
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         greenButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
-                if ((b.getSpaces()[0][0].getColour() != 3  || numMoves ==0)&& !b.isDoneFlooding()) {
+                if ((b.getSpaces()[0][0].getColour() != 3 || numMoves == 0) && !b.isDoneFlooding()) {
                     numMoves++;
                     b.changeColour(3);
                     changeGrid();
@@ -167,7 +235,7 @@ public class Main extends Application {
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         purpleButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
-                if ((b.getSpaces()[0][0].getColour() != 4 || numMoves == 0)&& !b.isDoneFlooding()) {
+                if ((b.getSpaces()[0][0].getColour() != 4 || numMoves == 0) && !b.isDoneFlooding()) {
                     numMoves++;
                     b.changeColour(4);
                     changeGrid();
@@ -184,7 +252,7 @@ public class Main extends Application {
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         orangeButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
-                if ((b.getSpaces()[0][0].getColour() != 5 || numMoves == 0)&& !b.isDoneFlooding()) {
+                if ((b.getSpaces()[0][0].getColour() != 5 || numMoves == 0) && !b.isDoneFlooding()) {
                     numMoves++;
                     b.changeColour(5);
                     changeGrid();
@@ -195,15 +263,14 @@ public class Main extends Application {
             }
         });
 
-
         numMovesLabel = new Label("Number of moves: " + numMoves);
-        numMovesLabel.setFont(Font.font ("Verdana", FontWeight.BOLD,20));
-        vbox.setAlignment( Pos.BOTTOM_CENTER);
+        numMovesLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
+        vbox.setAlignment(Pos.BOTTOM_CENTER);
 
-        vbox.getChildren().addAll(grid,numMovesLabel, yellowButton, blueButton, redButton, greenButton, purpleButton, orangeButton);
+        vbox.getChildren().addAll(grid, numMovesLabel, yellowButton, blueButton, redButton, greenButton, purpleButton, orangeButton);
 
         root = new StackPane();
-        StackPane.setMargin(grid, new Insets(8,8,8,8));
+        StackPane.setMargin(grid, new Insets(8, 8, 8, 8));
 
         root.getChildren().addAll(vbox);
 
@@ -214,10 +281,7 @@ public class Main extends Application {
         primaryStage.setResizable(false);
         primaryStage.show();
 
-
     }
-
-
 
     public void changeGrid() {
         vbox.getChildren().remove(grid);
@@ -229,14 +293,12 @@ public class Main extends Application {
         vbox.getChildren().remove(orangeButton);
         vbox.getChildren().remove(numMovesLabel);
 
-
         ObservableList<Color> colours = FXCollections.observableArrayList();
-        for (int i = 0; i<b.getSpaces().length; i++) {
-            for (int j = 0; j<b.getSpaces()[0].length; j++) {
+        for (int i = 0; i < b.getSpaces().length; i++) {
+            for (int j = 0; j < b.getSpaces()[0].length; j++) {
                 colours.add(Board.getColour(b.getSpaces()[i][j].getColour()));
             }
         }
-
 
         grid = new GridView<Color>(colours);
 
@@ -254,13 +316,11 @@ public class Main extends Application {
 
         numMovesLabel.setText("Number of moves: " + numMoves + "/17");
         Label finishedLabel = new Label();
-        if (numMoves <=17) {
+        if (numMoves <= 17) {
             finishedLabel.setText("You win!");
         } else {
             finishedLabel.setText("You lose!");
         }
-
-
 
         grid.setCellHeight(45);
         grid.setCellWidth(45);
@@ -269,13 +329,13 @@ public class Main extends Application {
 
         //root = new StackPane();
         //root.setAlignment(Pos.BOTTOM_RIGHT);
-        StackPane.setMargin(grid, new Insets(8,8,8,8));
-        vbox.getChildren().addAll(grid,numMovesLabel, yellowButton, blueButton, redButton, greenButton, purpleButton, orangeButton);
+        StackPane.setMargin(grid, new Insets(8, 8, 8, 8));
+        vbox.getChildren().addAll(grid, numMovesLabel, yellowButton, blueButton, redButton, greenButton, purpleButton, orangeButton);
         if (b.isDoneFlooding()) {
             vbox.getChildren().add(finishedLabel);
         }
 
     }
-
-
+ 
 }
+	
