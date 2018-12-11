@@ -116,6 +116,7 @@ public class Main extends Application {
                         launch(args);
                     }
                 }; 
+                new Thread(r).start();
 
                 System.out.println("\nWaiting for clients to find a result...");
 
