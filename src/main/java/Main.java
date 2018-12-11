@@ -80,6 +80,10 @@ public class Main extends Application {
             boardToSolve.printBoard();
             clientBoards.addAll(boardToSolve.getNextBoards());
 
+            
+           new Thread(()-> launch(args)).start();
+           
+            
             //do the server stuff
             System.out.println("Please enter the number of computers you wish to connect");
             requiredComputers = Integer.parseInt(kb.nextLine());
@@ -107,6 +111,9 @@ public class Main extends Application {
                 }
 
                 
+                
+                
+                
                 System.out.println("\nWaiting for clients to find a result...");
 
                 while (true) {
@@ -120,7 +127,7 @@ public class Main extends Application {
                         System.out.println(step);
                     }
                     
-                    launch(args);
+                    
 
                 }
 
