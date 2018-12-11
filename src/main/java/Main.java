@@ -81,12 +81,14 @@ public class Main extends Application {
             clientBoards.addAll(boardToSolve.getNextBoards());
 
             
-           new Thread(()-> launch(args)).start();
+           
            
             
             //do the server stuff
             System.out.println("Please enter the number of computers you wish to connect");
             requiredComputers = Integer.parseInt(kb.nextLine());
+            
+            new Thread(()-> launch(args)).start();
 
             ServerSocket ss = null;
             try {
@@ -119,7 +121,7 @@ public class Main extends Application {
                 while (true) {
                     Socket solutionSocket = ss.accept();
                     ObjectInputStream inputStream = new ObjectInputStream(solutionSocket.getInputStream());
-                    System.out.println("Found the Solution!");
+                    System.out.println("Found a Solution!");
 
                     ArrayList<String> solutionFromClient = (ArrayList<String>) inputStream.readObject();
 

@@ -133,8 +133,9 @@ public class Board extends RecursiveAction implements Comparable, Serializable {
                         outStream.writeObject(steps);
 
                         socket.close();
-
-                    
+                         
+                        System.out.println("Closing this client!");
+                        System.exit(0);
                 } catch (IOException ioe) {
                     ioe.printStackTrace();
                 }
