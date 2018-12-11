@@ -58,8 +58,8 @@ public class Main extends Application {
     private static Button orangeButton;
     private static Label numMovesLabel;
     private static VBox vbox;
-    private ArrayList<Socket> clients = new ArrayList();
-    private ArrayList<Board> clientBoards = new ArrayList();
+            static ArrayList<Socket> clients = new ArrayList();
+            static ArrayList<Board> clientBoards = new ArrayList();
 
     private static final int portNumber = 2697;
     private static String hostName;
@@ -76,11 +76,13 @@ public class Main extends Application {
         if (role == 1) {
              displayBoard = Board.generateRandomBoard(10, 10, 6);
              boardToSolve = new Board(displayBoard);
-            
-            
+             clientBoards.addAll(boardToSolve.getNextBoards());
+             
             //do the server stuff
             System.out.println("Please enter the number of computers you wish to connect");
             requiredComputers = Integer.parseInt(kb.nextLine());
+            
+
             ServerSocket ss = null;
             try {
                 ss = new ServerSocket(portNumber);
@@ -88,16 +90,16 @@ public class Main extends Application {
                 while (numConnections<requiredComputers) {
                     Socket socket = ss.accept();
                     if (socket != null) {
-                        System.out.println("Found a client!"+ numConnections  + " / "  + requiredComputers);
                         numConnections++;
+                        System.out.println("Found a client!"+ numConnections  + " / "  + requiredComputers);
                     }
                    
                     
                     ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
                     System.out.println("Object to be written = ");
-                    displayBoard.printBoard();
+                    clientBoards.get(numConnections).printBoard();
 
-                    outputStream.writeObject(displayBoard);
+                    outputStream.writeObject(clientBoards.get(numConnections));
 
                     socket.close();
 
