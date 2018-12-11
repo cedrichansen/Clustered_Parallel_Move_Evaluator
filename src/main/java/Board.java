@@ -28,7 +28,7 @@ public class Board extends RecursiveAction implements Comparable {
     *   Main method, starts at 1 (because it is a clone of the board that is being displayed on the GUI), thus 18 is selected
     *
     */
-    private static final int MAX_NUM_MOVES = 18;
+    private static final int MAX_NUM_MOVES = 16;
 
     static ArrayList<String> cToWin = new ArrayList<>();
 
