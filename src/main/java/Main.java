@@ -88,7 +88,7 @@ public class Main extends Application {
                 while (numConnections<requiredComputers) {
                     Socket socket = ss.accept();
                     if (socket != null) {
-                        System.out.println("Found a client!");
+                        System.out.println("Found a client!"+ numConnections  + " / "  + requiredComputers);
                         numConnections++;
                     }
                     
@@ -117,10 +117,10 @@ public class Main extends Application {
 
             hostName = kb.nextLine();
 
-            System.out.println("Creating socket to '" + hostName + "' on port " + portNumber);
             try {
                 while (true) {
                     Socket socket = new Socket(hostName, portNumber);
+                    System.out.println("Creating socket to '" + hostName + "' on port " + portNumber);
 
                     
                     ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
