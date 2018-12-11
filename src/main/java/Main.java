@@ -125,8 +125,8 @@ public class Main extends Application {
                     
                     ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
                     
-                    Board theBoard = (Board)inStream.readObject();
-                    theBoard.printBoard();
+                    boardToSolve = (Board)inStream.readObject();
+                    boardToSolve.printBoard();
                     
                     ForkJoinPool childBoardSolver = new ForkJoinPool();
                     childBoardSolver.invoke(boardToSolve);
