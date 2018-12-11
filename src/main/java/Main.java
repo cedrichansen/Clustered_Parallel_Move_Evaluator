@@ -1,7 +1,8 @@
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
@@ -34,6 +35,9 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Stack;
 import java.util.concurrent.ForkJoinPool;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.io.ObjectOutputStream;
 
 public class Main extends Application {
 
@@ -76,18 +80,16 @@ public class Main extends Application {
 
                 while (true) {
                     Socket socket = ss.accept();
-                    OutputStream os = socket.getOutputStream();
-                    PrintWriter pw = new PrintWriter(os, true);
-                    pw.println("What's you name?");
+                    ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+                    ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+                    
+               
+                    System.out.println("Here is the parent board we will tackle");
+                    oos.writeObject(b);
+                    oos.flush();
 
-                    BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                    String str = br.readLine();
-
-                    pw.println("Hello, " + str);
-                    pw.close();
                     socket.close();
 
-                    System.out.println("Just said hello to:" + str);
                 }
 
             } catch (IOException io) {
@@ -106,25 +108,20 @@ public class Main extends Application {
             try {
                 while (true) {
                     Socket socket = new Socket(hostName, portNumber);
-                    BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-
-                    System.out.println("server says:" + br.readLine());
-
-                    BufferedReader userInputBR = new BufferedReader(new InputStreamReader(System.in));
-                    String userInput = userInputBR.readLine();
-
-                    out.println(userInput);
-
-                    System.out.println("server says:" + br.readLine());
-
-                    if ("exit".equalsIgnoreCase(userInput)) {
-                        socket.close();
-                        break;
-                    }
+                    
+                    ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+                    Board theBoard = (Board)in.readObject();
+                    theBoard.printBoard();
+                    
+                    
+                    in.close();
+                    socket.close();
+                    
                 }
             } catch (IOException ioe) {
                 ioe.printStackTrace();
+            } catch (ClassNotFoundException ee) {
+                ee.printStackTrace();
             }
 
         } else {

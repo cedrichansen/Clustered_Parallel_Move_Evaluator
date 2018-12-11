@@ -1,10 +1,11 @@
 
+import java.io.Serializable;
 import javafx.scene.paint.Color;
 
 import java.util.*;
 import java.util.concurrent.RecursiveAction;
 
-public class Board extends RecursiveAction implements Comparable {
+public class Board extends RecursiveAction implements Comparable, Serializable {
 
     //no need to keep track of which state the current colour of encapsulated section, because it will always be the
     //colour of spaces[0][0]
