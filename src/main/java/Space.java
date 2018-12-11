@@ -1,6 +1,7 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Space {
+public class Space implements Serializable {
 
     private         int                     colour;
     private         boolean                 isEncapsulated;
