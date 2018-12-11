@@ -106,7 +106,6 @@ public class Main extends Application {
 
                 }
 
-                
 
                 //launch(args);
                 Platform.runLater(() -> {
@@ -120,12 +119,10 @@ public class Main extends Application {
                     ObjectInputStream inputStream = new ObjectInputStream(solutionSocket.getInputStream());
                     System.out.println("Found the Solution!");
 
-                    ArrayList<Color> solutionFromClient = (ArrayList<Color>) inputStream.readObject();
-                    int count = 1;
+                    ArrayList<String> solutionFromClient = (ArrayList<String>) inputStream.readObject();
 
-                    for (Color c : solutionFromClient) {
-                        System.out.println(count + " : " + Board.printColour(c.toString()));
-                        count++;
+                    for (String step : solutionFromClient) {
+                        System.out.println(step);
                     }
 
                 }

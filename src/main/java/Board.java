@@ -111,12 +111,17 @@ public class Board extends RecursiveAction implements Comparable, Serializable {
                 System.out.println("Solution has been found!");
                 solution = this;
                 ArrayList<Color> sColours = solution.getStepsToSolveBoard();
+                ArrayList<String>steps = new ArrayList<>();
+               
 
                 System.out.println("\n\n\nSteps to solve board\n");
                 int count = 1;
                 for (Color c : sColours) {
-                    System.out.println(count + " : " + printColour(c.toString()));
+                    String step = count + " " + printColour(c.toString());
+                    System.out.println(step);
+                    steps.add(step);
                     count++;
+                    
                 }
 
                 System.out.println("sending the steps to the host...");
@@ -130,7 +135,7 @@ public class Board extends RecursiveAction implements Comparable, Serializable {
                         System.out.println("Creating socket to '" + Main.hostName + "' on port " + Main.portNumber);
 
                         ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
-                        outStream.writeObject(sColours);
+                        outStream.writeObject(steps);
 
                         socket.close();
 
