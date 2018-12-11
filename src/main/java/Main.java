@@ -91,6 +91,7 @@ public class Main extends Application {
                         System.out.println("Found a client!"+ numConnections  + " / "  + requiredComputers);
                         numConnections++;
                     }
+                   
                     
                     ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
                     System.out.println("Object to be written = ");
@@ -116,12 +117,13 @@ public class Main extends Application {
             System.out.println("Type in host IP");
 
             hostName = kb.nextLine();
-
+            boolean connected = false;
             try {
-                while (true) {
+                while (!connected) {
                     Socket socket = new Socket(hostName, portNumber);
+                    
+                    connected = true;
                     System.out.println("Creating socket to '" + hostName + "' on port " + portNumber);
-
                     
                     ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
                     
