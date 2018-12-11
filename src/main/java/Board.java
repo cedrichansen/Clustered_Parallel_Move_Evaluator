@@ -1,4 +1,3 @@
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -133,9 +132,8 @@ public class Board extends RecursiveAction implements Comparable, Serializable {
                         outStream.writeObject(steps);
 
                         socket.close();
-                         
-                        System.out.println("Closing this client!");
-                        System.exit(0);
+
+                    
                 } catch (IOException ioe) {
                     ioe.printStackTrace();
                 }
