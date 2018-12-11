@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import javafx.application.Application;
@@ -52,7 +53,7 @@ public class Main extends Application {
     private static VBox vbox;
 
     private static final int portNumber = 2697;
-    private static final String hostName = "localhost";
+    private static String hostName;
 
     public static void main(String[] args) {
         b = Board.generateRandomBoard(10, 10, 6);
@@ -73,7 +74,7 @@ public class Main extends Application {
             try {
                 ss = new ServerSocket(portNumber);
 
-                while (numConnections < requiredComputers) {
+                while (true) {
                     Socket socket = ss.accept();
                     OutputStream os = socket.getOutputStream();
                     PrintWriter pw = new PrintWriter(os, true);
@@ -91,12 +92,15 @@ public class Main extends Application {
 
             } catch (IOException io) {
                 System.out.println("Something went wrong in client");
-                  
+
             }
-            
 
         } else if (role == 2) {
             //do the "client" stuff
+
+            System.out.println("Type in host IP");
+
+            hostName = kb.nextLine();
 
             System.out.println("Creating socket to '" + hostName + "' on port " + portNumber);
             try {
@@ -336,6 +340,5 @@ public class Main extends Application {
         }
 
     }
- 
+
 }
-	
