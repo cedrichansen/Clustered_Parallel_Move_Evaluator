@@ -76,6 +76,7 @@ public class Main extends Application {
         if (role == 1) {
              displayBoard = Board.generateRandomBoard(10, 10, 6);
              boardToSolve = new Board(displayBoard);
+             boardToSolve.printBoard();
              clientBoards.addAll(boardToSolve.getNextBoards());
              
             //do the server stuff
@@ -104,6 +105,8 @@ public class Main extends Application {
                     socket.close();
 
                 }
+                
+                System.out.println("Waiting for clients to find a result...");
                 
                 launch(args);
 
