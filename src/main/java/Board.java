@@ -124,8 +124,12 @@ public class Board extends RecursiveAction implements Comparable, Serializable {
 
                 System.out.println("sending the steps to the host...");
 
+                boolean connected = false;
                 try {
+                    while (!connected) {
                         Socket socket = new Socket(Main.hostName, Main.portNumber);
+
+                        connected = true;
                         System.out.println("Creating socket to '" + Main.hostName + "' on port " + Main.portNumber);
 
                         ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
@@ -133,7 +137,7 @@ public class Board extends RecursiveAction implements Comparable, Serializable {
 
                         socket.close();
 
-                    
+                    }
                 } catch (IOException ioe) {
                     ioe.printStackTrace();
                 }
