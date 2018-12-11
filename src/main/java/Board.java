@@ -1,8 +1,13 @@
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.Socket;
 import javafx.scene.paint.Color;
 
 import java.util.*;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 
 public class Board extends RecursiveAction implements Comparable, Serializable {
@@ -113,6 +118,27 @@ public class Board extends RecursiveAction implements Comparable, Serializable {
                     System.out.println(count + " : " + printColour(c.toString()));
                     count++;
                 }
+
+                System.out.println("sending the steps to the host...");
+
+                boolean connected = false;
+                try {
+                    while (!connected) {
+                        Socket socket = new Socket(Main.hostName, Main.portNumber);
+
+                        connected = true;
+                        System.out.println("Creating socket to '" + Main.hostName + "' on port " + Main.portNumber);
+
+                        ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
+                        outStream.writeObject(sColours);
+
+                        socket.close();
+
+                    }
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
+                }
+
             }
 
         }
@@ -143,14 +169,14 @@ public class Board extends RecursiveAction implements Comparable, Serializable {
 
         for (int i = 0; i < 6; i++) {
             int copyNumEncapsulatedSpaces = copies[i].numEncapsulatedSpaces;
-            if (0 < copyNumEncapsulatedSpaces- parentNumEncapsulated) {
+            if (0 < copyNumEncapsulatedSpaces - parentNumEncapsulated) {
 
                 goodChildBoards.add(copies[i]);
             }
         }
 
         Collections.sort(goodChildBoards);
-       
+
         return goodChildBoards;
     }
 

@@ -58,14 +58,14 @@ public class Main extends Application {
     private static Button orangeButton;
     private static Label numMovesLabel;
     private static VBox vbox;
-            static ArrayList<Socket> clients = new ArrayList();
-            static ArrayList<Board> clientBoards = new ArrayList();
+    static ArrayList<Socket> clients = new ArrayList();
+    static ArrayList<Board> clientBoards = new ArrayList();
 
-    private static final int portNumber = 2697;
-    private static String hostName;
+    static final int portNumber = 2697;
+    static String hostName;
 
     public static void main(String[] args) {
-       
+
         Scanner kb = new Scanner(System.in);
         int role;
         System.out.println("Hello. \nPlease type 1 to accept connections (server role)\nPress 2 to connect to another computer");
@@ -74,46 +74,61 @@ public class Main extends Application {
         int numConnections = 0;
 
         if (role == 1) {
-             displayBoard = Board.generateRandomBoard(10, 10, 6);
-             boardToSolve = new Board(displayBoard);
-             boardToSolve.printBoard();
-             clientBoards.addAll(boardToSolve.getNextBoards());
-             
+            displayBoard = Board.generateRandomBoard(10, 10, 6);
+            boardToSolve = new Board(displayBoard);
+            boardToSolve.printBoard();
+            clientBoards.addAll(boardToSolve.getNextBoards());
+
             //do the server stuff
             System.out.println("Please enter the number of computers you wish to connect");
             requiredComputers = Integer.parseInt(kb.nextLine());
-            
 
             ServerSocket ss = null;
             try {
                 ss = new ServerSocket(portNumber);
 
-                while (numConnections<requiredComputers) {
+                while (numConnections < requiredComputers) {
                     Socket socket = ss.accept();
-             
+
                     ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
                     System.out.println("Object to be written = ");
                     clientBoards.get(numConnections).printBoard();
 
                     outputStream.writeObject(clientBoards.get(numConnections));
-                    
+
                     if (socket != null) {
                         numConnections++;
-                        System.out.println("Found a client!"+ numConnections  + " / "  + requiredComputers);
+                        System.out.println("Found a client!" + numConnections + " / " + requiredComputers);
                     }
 
                     socket.close();
 
                 }
-                
-                System.out.println("Waiting for clients to find a result...");
-                
+
+                System.out.println("\nWaiting for clients to find a result...");
+
                 launch(args);
 
+                while (true) {
+                    Socket solutionSocket = ss.accept();
+                    ObjectInputStream inputStream = new ObjectInputStream(solutionSocket.getInputStream());
+                    System.out.println("Found the Solution!");
+
+                    ArrayList<Color> solutionFromClient = (ArrayList<Color>) inputStream.readObject();
+                    int count = 1;
+                    
+                    for (Color c : solutionFromClient) {
+                        System.out.println(count + " : " + Board.printColour(c.toString()));
+                        count++;
+                    }
+
+                }
 
             } catch (IOException io) {
                 System.out.println("Something went wrong in client");
 
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
 
         } else if (role == 2) {
@@ -126,18 +141,18 @@ public class Main extends Application {
             try {
                 while (!connected) {
                     Socket socket = new Socket(hostName, portNumber);
-                    
+
                     connected = true;
                     System.out.println("Creating socket to '" + hostName + "' on port " + portNumber);
-                    
+
                     ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
-                    
-                    boardToSolve = (Board)inStream.readObject();
+
+                    boardToSolve = (Board) inStream.readObject();
                     boardToSolve.printBoard();
-                    
+
                     ForkJoinPool childBoardSolver = new ForkJoinPool();
                     childBoardSolver.invoke(boardToSolve);
-                    
+
                     socket.close();
 
                 }
@@ -145,14 +160,11 @@ public class Main extends Application {
                 ioe.printStackTrace();
             } catch (ClassNotFoundException ex) {
                 ex.printStackTrace();
-            } 
+            }
 
         } else {
             System.out.println("Typed in invalid command.... Please relaunch");
         }
-
-        
-
 
     }
 
