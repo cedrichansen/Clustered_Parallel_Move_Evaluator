@@ -40,6 +40,7 @@ import java.net.Socket;
 import java.io.ObjectOutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 
 public class Main extends Application {
 
@@ -105,9 +106,14 @@ public class Main extends Application {
 
                 }
 
-                System.out.println("\nWaiting for clients to find a result...");
+                
 
-                launch(args);
+                //launch(args);
+                Platform.runLater(() -> {
+                    launch(args);
+                });
+
+                System.out.println("\nWaiting for clients to find a result...");
 
                 while (true) {
                     Socket solutionSocket = ss.accept();
@@ -116,7 +122,7 @@ public class Main extends Application {
 
                     ArrayList<Color> solutionFromClient = (ArrayList<Color>) inputStream.readObject();
                     int count = 1;
-                    
+
                     for (Color c : solutionFromClient) {
                         System.out.println(count + " : " + Board.printColour(c.toString()));
                         count++;
@@ -128,7 +134,7 @@ public class Main extends Application {
                 System.out.println("Something went wrong in client");
 
             } catch (ClassNotFoundException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                ex.printStackTrace();
             }
 
         } else if (role == 2) {
