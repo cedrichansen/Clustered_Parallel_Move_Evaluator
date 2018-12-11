@@ -89,17 +89,17 @@ public class Main extends Application {
 
                 while (numConnections<requiredComputers) {
                     Socket socket = ss.accept();
-                    if (socket != null) {
-                        numConnections++;
-                        System.out.println("Found a client!"+ numConnections  + " / "  + requiredComputers);
-                    }
-                   
-                    
+             
                     ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
                     System.out.println("Object to be written = ");
                     clientBoards.get(numConnections).printBoard();
 
                     outputStream.writeObject(clientBoards.get(numConnections));
+                    
+                    if (socket != null) {
+                        numConnections++;
+                        System.out.println("Found a client!"+ numConnections  + " / "  + requiredComputers);
+                    }
 
                     socket.close();
 
