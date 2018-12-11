@@ -111,8 +111,7 @@ public class Board extends RecursiveAction implements Comparable, Serializable {
                 System.out.println("Solution has been found!");
                 solution = this;
                 ArrayList<Color> sColours = solution.getStepsToSolveBoard();
-                ArrayList<String>steps = new ArrayList<>();
-               
+                ArrayList<String> steps = new ArrayList<>();
 
                 System.out.println("\n\n\nSteps to solve board\n");
                 int count = 1;
@@ -121,7 +120,7 @@ public class Board extends RecursiveAction implements Comparable, Serializable {
                     System.out.println(step);
                     steps.add(step);
                     count++;
-                    
+
                 }
 
                 System.out.println("sending the steps to the host...");
@@ -172,11 +171,48 @@ public class Board extends RecursiveAction implements Comparable, Serializable {
 
         ArrayList<Board> goodChildBoards = new ArrayList<>();
 
-        for (int i = 0; i < 6; i++) {
-            int copyNumEncapsulatedSpaces = copies[i].numEncapsulatedSpaces;
-            if (0 < copyNumEncapsulatedSpaces - parentNumEncapsulated) {
+        if (parent.numStepsTaken >= 2 && parent.numStepsTaken <= 16) {
 
-                goodChildBoards.add(copies[i]);
+            //look to add boards which add at least 3 new encapsulated squares...
+            for (int i = 0; i < 6; i++) {
+                if (3 < copies[i].getNumEncapsulatedSpaces() - parentNumEncapsulated) {
+                    goodChildBoards.add(copies[i]);
+                }
+            }
+
+            //if no board has at least 3 new encapsulated squares, then add ones with at least 2 new encapsulated squares
+            if (goodChildBoards.size() == 0) {
+                for (int i = 0; i < 6; i++) {
+                    if (2 < copies[i].getNumEncapsulatedSpaces() - parentNumEncapsulated) {
+                        goodChildBoards.add(copies[i]);
+                    }
+                }
+            }
+
+            //if no board has at least 2 new encapsulated squares, then add ones with at least 1 new encapsulated squares
+            if (goodChildBoards.size() == 0) {
+                for (int i = 0; i < 6; i++) {
+                    if (1 < copies[i].getNumEncapsulatedSpaces() - parentNumEncapsulated) {
+                        goodChildBoards.add(copies[i]);
+                    }
+                }
+            }
+
+            //if still no good board has been added, just add whatever actually add encapsulated squares
+            if (goodChildBoards.size() == 0) {
+                for (int i = 0; i < 6; i++) {
+                    if (0 < copies[i].getNumEncapsulatedSpaces() - parentNumEncapsulated) {
+                        goodChildBoards.add(copies[i]);
+                    }
+                }
+            }
+
+        } else {
+            for (int i = 0; i < 6; i++) {
+                if (0 < copies[i].getNumEncapsulatedSpaces() - parentNumEncapsulated) {
+
+                    goodChildBoards.add(copies[i]);
+                }
             }
         }
 
