@@ -113,7 +113,7 @@ public class Main extends Application {
                     ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
                     
                     Board theBoard = (Board)inStream.readObject();
-                    
+                    theBoard.printBoard();
                     
                     socket.close();
 
