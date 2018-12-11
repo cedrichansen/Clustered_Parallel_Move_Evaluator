@@ -144,12 +144,10 @@ public class Main extends Application {
             System.out.println("Type in host IP");
 
             hostName = kb.nextLine();
-            boolean connected = false;
+            
             try {
-                while (!connected) {
+                
                     Socket socket = new Socket(hostName, portNumber);
-
-                    connected = true;
                     System.out.println("Creating socket to '" + hostName + "' on port " + portNumber);
 
                     ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
@@ -162,7 +160,7 @@ public class Main extends Application {
 
                     socket.close();
 
-                }
+                
             } catch (IOException ioe) {
                 ioe.printStackTrace();
             } catch (ClassNotFoundException ex) {
