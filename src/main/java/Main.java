@@ -106,18 +106,7 @@ public class Main extends Application {
 
                 }
 
-
-                //launch(args);
                 
-                
-                Runnable r = new Runnable() {
-                    @Override
-                    public void run() {
-                        launch(args);
-                    }
-                }; 
-                new Thread(r).start();
-
                 System.out.println("\nWaiting for clients to find a result...");
 
                 while (true) {
@@ -130,6 +119,8 @@ public class Main extends Application {
                     for (String step : solutionFromClient) {
                         System.out.println(step);
                     }
+                    
+                    launch(args);
 
                 }
 
