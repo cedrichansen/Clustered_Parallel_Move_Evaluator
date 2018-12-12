@@ -1,3 +1,4 @@
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -89,7 +90,7 @@ public class Board extends RecursiveAction implements Comparable, Serializable {
         if (!doneFlooding && solution == null) {
 
             System.out.println("Analyzing board - steps: " + numStepsTaken + "      Number of boards generated: "
-                    + increaseNumPathsAttempted() + "     completion %:  " + ((double) numEncapsulatedSpaces) / 100);
+                    + increaseNumPathsAttempted() + "     completion :  " + numEncapsulatedSpaces);
 
             List<Board> subtasks = new ArrayList<>(getNextBoards());
 
@@ -104,40 +105,26 @@ public class Board extends RecursiveAction implements Comparable, Serializable {
         } else {
             if (solution == null) {
 
-                System.out.println("Analyzing board - steps: " + numStepsTaken + "      Number of boards generated: "
-                        + increaseNumPathsAttempted() + "     completion %:  " + ((double) numEncapsulatedSpaces) / 100);
-
-                System.out.println("Solution has been found!");
                 solution = this;
                 ArrayList<Color> sColours = solution.getStepsToSolveBoard();
                 ArrayList<String> steps = new ArrayList<>();
-
-                System.out.println("\n\n\nSteps to solve board\n");
                 int count = 1;
                 for (Color c : sColours) {
                     String step = count + " " + printColour(c.toString());
                     System.out.println(step);
                     steps.add(step);
                     count++;
-
                 }
 
-                System.out.println("sending the steps to the host...");
-
-                boolean connected = false;
                 try {
-                    while (!connected) {
-                        Socket socket = new Socket(Main.hostName, Main.portNumber);
+                    Socket socket = new Socket(Main.hostName, Main.portNumber);
 
-                        connected = true;
-                        System.out.println("Creating socket to '" + Main.hostName + "' on port " + Main.portNumber);
+                    ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
+                    outStream.writeObject(steps);
 
-                        ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
-                        outStream.writeObject(steps);
+                    socket.close();
+                    System.exit(0);
 
-                        socket.close();
-
-                    }
                 } catch (IOException ioe) {
                     ioe.printStackTrace();
                 }

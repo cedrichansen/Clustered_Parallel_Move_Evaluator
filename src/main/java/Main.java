@@ -1,3 +1,4 @@
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,7 +69,7 @@ public class Main extends Application {
 
         Scanner kb = new Scanner(System.in);
         int role;
-        System.out.println("Hello. \nPlease type 1 to accept connections (server role)\nPress 2 to connect to another computer");
+        System.out.println("Please type 1 to accept connections (server role)\nPress 2 to connect to another computer");
         role = Integer.parseInt(kb.nextLine());
         int requiredComputers = 0;
         int numConnections = 0;
@@ -79,12 +80,11 @@ public class Main extends Application {
             boardToSolve.printBoard();
             clientBoards.addAll(boardToSolve.getNextBoards());
 
-
             //do the server stuff
             System.out.println("Please enter the number of computers you wish to connect");
             requiredComputers = Integer.parseInt(kb.nextLine());
-            
-            new Thread(()-> launch(args)).start();
+
+            new Thread(() -> launch(args)).start();
 
             ServerSocket ss = null;
             try {
@@ -94,21 +94,15 @@ public class Main extends Application {
                     Socket socket = ss.accept();
 
                     ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
-                    System.out.println("Object to be written = ");
-                    clientBoards.get(numConnections).printBoard();
-
                     outputStream.writeObject(clientBoards.get(numConnections));
 
-                    if (socket != null) {
-                        numConnections++;
-                        System.out.println("Found a client!" + numConnections + " / " + requiredComputers);
-                    }
+                    numConnections++;
+                    System.out.println("Client connected: " + numConnections + " / " + requiredComputers);
 
                     socket.close();
 
                 }
 
-                System.out.println("\nWaiting for clients to find a result...");
 
                 while (true) {
                     Socket solutionSocket = ss.accept();
@@ -120,14 +114,14 @@ public class Main extends Application {
                     for (String step : solutionFromClient) {
                         System.out.println(step);
                     }
-                    
-                    solutionSocket.close();
 
+                    solutionSocket.close();
                 }
 
             } catch (IOException io) {
-                System.out.println("Something went wrong in client");
                 io.printStackTrace();
+                System.exit(-1);
+                
 
             } catch (ClassNotFoundException ex) {
                 ex.printStackTrace();
@@ -135,28 +129,22 @@ public class Main extends Application {
 
         } else if (role == 2) {
             //do the "client" stuff
-
-            System.out.println("Type in host IP");
+            System.out.println("Type in host IP:");
 
             hostName = kb.nextLine();
             boolean connected = false;
             try {
                 while (!connected) {
                     Socket socket = new Socket(hostName, portNumber);
-
-                    connected = true;
-                    System.out.println("Creating socket to '" + hostName + "' on port " + portNumber);
-
+                    connected = true;     
                     ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
 
                     boardToSolve = (Board) inStream.readObject();
-                    boardToSolve.printBoard();
 
                     ForkJoinPool childBoardSolver = new ForkJoinPool();
                     childBoardSolver.invoke(boardToSolve);
 
                     socket.close();
-
                 }
             } catch (IOException ioe) {
                 ioe.printStackTrace();
@@ -166,6 +154,7 @@ public class Main extends Application {
 
         } else {
             System.out.println("Typed in invalid command.... Please relaunch");
+            
         }
 
     }
