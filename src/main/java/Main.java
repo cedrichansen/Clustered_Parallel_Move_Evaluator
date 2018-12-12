@@ -108,10 +108,6 @@ public class Main extends Application {
 
                 }
 
-                
-                
-                
-                
                 System.out.println("\nWaiting for clients to find a result...");
 
                 while (true) {
