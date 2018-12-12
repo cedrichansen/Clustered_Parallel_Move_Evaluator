@@ -124,6 +124,8 @@ public class Main extends Application {
                     for (String step : solutionFromClient) {
                         System.out.println(step);
                     }
+                    
+                    solutionSocket.close();
 
                 }
 
