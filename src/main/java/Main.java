@@ -129,6 +129,7 @@ public class Main extends Application {
 
             } catch (IOException io) {
                 System.out.println("Something went wrong in client");
+                io.printStackTrace();
 
             } catch (ClassNotFoundException ex) {
                 ex.printStackTrace();
